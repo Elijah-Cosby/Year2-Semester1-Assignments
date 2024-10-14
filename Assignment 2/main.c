@@ -1,5 +1,7 @@
 // CODE: include necessary library(s)
-
+#include <stdio.h>
+#include <string.h>
+#include "mySort.h"
 // Utility functions
 void printArray(int arr[], int n);
 
@@ -22,6 +24,38 @@ int main() {
     // CODE: do the same test cases for Insertion Sort, Merge Sort, Heap Sort, Counting Sort
     // You will submit main.c, and your project will be marked based on main.c as well
     
+    // Insertion Sort
+    memcpy(testArr, arr, n * sizeof(int));
+    printf("Original array: ");
+    printArray(testArr, n);
+    insertionSort(testArr, n);
+    printf("Insertion sorted array: ");
+    printArray(testArr, n);
+
+    //Merge Sort
+    memcpy(testArr, arr, n * sizeof(int));
+    printf("Original array: ");
+    printArray(testArr, n);
+    mergeSort(testArr, 0, n-1);
+    printf("Merge sorted array: ");
+    printArray(testArr, n);
+
+    //Heap Sort
+    memcpy(testArr, arr, n * sizeof(int));
+    printf("Original array: ");
+    printArray(testArr, n);
+    heapSort(testArr, n);
+    printf("Heap sorted array: ");
+    printArray(testArr, n);
+
+    // Counting Sort
+    memcpy(testArr, arr, n * sizeof(int));
+    printf("Original array: ");
+    printArray(testArr, n);
+    countingSort(testArr, n);
+    printf("Counting sorted array: ");
+    printArray(testArr, n);
+
     return 0;
 }
 
