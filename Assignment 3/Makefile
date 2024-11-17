@@ -14,4 +14,4 @@ clean:
 	rm -rf $(EXEC)
 
 run: $(EXEC)
-	./$(EXEC)
+	./$(EXEC) 

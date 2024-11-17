@@ -18,29 +18,75 @@ WordData* getData(const char* fileName, int* lineCount){
         return NULL;
     }
     
-    //Find number of words
+    // Find number of words
     int numLines = 0;
-    char line[MAX_WORD_LEN];
+    char line[512];
     while (fgets(line, sizeof(line), dataPtr) != NULL){
         numLines++;
     }
+    // Bring ptr back to start of file
+    rewind(dataPtr);
+
     WordData* data = malloc(numLines * sizeof(WordData));
-    
+    if (data == NULL) {
+        printf("Memory allocation failed\n");
+        return NULL;
+    }
+
     *lineCount = 0;
-    //Used fscanf here over fgets because then we won't have to do the parsing through the entire line afterwards
-    while (fscanf(dataPtr, "%s %f %f", data[*lineCount].word, &data[*lineCount].value1, &data[*lineCount].value2) == 3){
-        for(int i=0; i<ARRAY_SIZE;i++){
-            fscanf(dataPtr, "%d", &data[*lineCount].intArray[i]);
-            if (fscanf(dataPtr, "%d", &data[*lineCount].intArray[i]) != 1) {
-                printf("Error reading data\n");
-                break;  // Handle the error appropriately
+    while (fgets(line, sizeof(line), dataPtr) != NULL){
+        char word[MAX_WORD_LEN];
+        float value1, value2;
+        int intArray[ARRAY_SIZE];
+
+        // Parses line
+        char* ptr = line;
+        // Reads word
+        if (sscanf(ptr, "%s", word) != 1) {
+            printf("Error parsing word in line: %s\n", line);
+            continue;
+        }
+        strcpy(data[*lineCount].word, word);
+        ptr += strlen(word);
+
+        // Reads values
+        if (sscanf(ptr, "%f %f", &value1, &value2) != 2) {
+            continue;
+        }
+        data[*lineCount].value1 = value1;
+        data[*lineCount].value2 = value2;
+
+        // Find the opening bracket
+        char* bracketStart = strchr(ptr, '[');
+        if (!bracketStart) {
+            printf("Error: Expected '[' in line: %s\n", line);
+            continue;
+        }
+        bracketStart++; // Move past '['
+
+        // Read the integers
+        for (int i = 0; i < ARRAY_SIZE; i++) {
+            int val;
+            if (sscanf(bracketStart, "%d", &val) != 1) {
+                printf("Error parsing integer in line: %s\n", line);
+                break;
             }
+            data[*lineCount].intArray[i] = val;
+
+            // Move to next number
+            bracketStart = strchr(bracketStart, ',');
+            if (bracketStart == NULL && i < ARRAY_SIZE - 1) {
+                printf("Error: Not enough numbers in array in line: %s\n", line);
+                break;
+            }
+            if (bracketStart) bracketStart++;
         }
         (*lineCount)++;
     }
     fclose(dataPtr);
     return data;
 }
+
 
 float getWordScore(const char* word, WordData* data, int *lineCount) {
     for (int i = 0; i < *lineCount; i++) {
@@ -52,42 +98,96 @@ float getWordScore(const char* word, WordData* data, int *lineCount) {
 }
 
 int isAllCaps(const char* word) {
+    int hasLetters = 0;
     for (int i = 0; word[i] != '\0'; i++) {
-        if (!isupper(word[i])) return 0;
+        if (isalpha((unsigned char)word[i])) {
+            hasLetters = 1;
+            if (!isupper((unsigned char)word[i])) return 0;
+        }
     }
-    return 1;
+    return hasLetters;
 }
 
 int isIntensifier(const char* word) {
-    const char* intensifiers[] = {"very", "extremely", "absolutely", "completely"};
-    for (int i = 0; i < sizeof(intensifiers) / sizeof(intensifiers[0]); i++) {
+    const char* intensifiers[] = {"FRIGGIN","absolutely", "completely", "extremely", "really", "so", "totally","very", "particularly", "exceptionally", "friggin", "incredibly", "remarkably", "uber"};
+    for (int i = 0; i < (sizeof(intensifiers) / sizeof(intensifiers[0])); i++) {
         if (strcmp(word, intensifiers[i]) == 0) return 1;
     }
     return 0;
 }
 
+int isNegation(const char* word) {
+    const char* negations[] = {"barely", "hardly", "scarcely", "somewhat", "mildly", "slightly","partially", "fairly","not", "isn't","isnt", "nor"};
+    int numNegations = sizeof(negations) / sizeof(negations[0]);
+    for (int i = 0; i < numNegations; i++) {
+        if (strcmp(word, negations[i]) == 0) return 1;
+    }
+    return 0;
+}
+
+
 float calcSentiment(const char* sentence, WordData* data, int* lineCount) {
     float totalScore = 0;
     int sentWordCount = 0;
+    int negNext = 0;
+    int negScope = 0;
+    int intNext = 0;
 
     char sentenceCopy[250];
     strcpy(sentenceCopy, sentence);
     char* word = strtok(sentenceCopy, " ");
 
     while (word != NULL) {
-        float wordScore = getWordScore(word, data, lineCount);
+        //To ensure word is all lowercase
+        char cleanWord[50];
+        int j = 0;
+        for (int i = 0; word[i]; i++) {
+            if (isalpha(word[i])) {
+                cleanWord[j++] = tolower(word[i]);
+            }
+        }
+        cleanWord[j] = '\0';
+
+        //Check if word is a negaative word that would make the next word the opposite or an intensifier
+        if (isNegation(cleanWord)) {
+            negScope = 3;
+            intNext = 0;
+        }
+        if (isIntensifier(cleanWord)) {
+            intNext = 1;
+        }
+        float wordScore = getWordScore(cleanWord, data, lineCount);
         if (wordScore != 0) {
-            if (isIntensifier(word)){
+            if (negScope>0) {
+                wordScore *= -0.5;
+                negScope--;
+            }
+            if (intNext){
                 wordScore *= (1+INTENSIFIER_BOOST);
+                intNext = 0;
             }
             if (isAllCaps(word)){
-                wordScore *= (1+ALLCAPS_BOOST);
+                wordScore *= ALLCAPS_BOOST;
             }
             totalScore += wordScore;
             sentWordCount++;
         }
         word = strtok(NULL, " ");
     }
+
+    int exclamations = 0;
+    for (int i = 0; sentence[i]; i++) {
+        if (sentence[i] == '!') {
+            exclamations++;
+        }
+    }
+    if (exclamations > 0) {
+        // Cap the emphasis at 3 exclamation marks
+        int emphasis = exclamations > 3 ? 3 : exclamations;
+        float boost = emphasis * 0.292;
+        totalScore += boost;
+    }
+
     float compound = totalScore / sqrt(totalScore * totalScore + NORMALIZATION_ALPHA);
     return compound;
 }
