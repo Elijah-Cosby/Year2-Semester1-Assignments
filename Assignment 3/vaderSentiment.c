@@ -129,7 +129,6 @@ int isNegation(const char* word) {
 float calcSentiment(const char* sentence, WordData* data, int* lineCount) {
     float totalScore = 0;
     int sentWordCount = 0;
-    int negNext = 0;
     int negScope = 0;
     int intNext = 0;
 
