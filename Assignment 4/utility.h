@@ -15,5 +15,11 @@ double random_double(double min, double max);
 double pso(ObjectiveFunction objective_function, int NUM_VARIABLES, Bound *bounds, int NUM_PARTICLES, int MAX_ITERATIONS, double best_position[]);
 
 // CODE: declare other functions and structures if necessary
+typedef struct Particle{
+    double position[NUM_VARIABLES];
+    double velocity[NUM_VARIABLES];
+    double bestPosition[NUM_VARIABLES];
+    double fitnessVal;
+}Particle;
 
 #endif // UTILITY_H

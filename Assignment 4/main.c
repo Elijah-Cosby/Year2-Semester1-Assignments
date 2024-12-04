@@ -1,4 +1,11 @@
 // CODE: inlcude library(s)
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include <time.h>
+#include "OF_lib.h"
+#include "utility.h"
 
 int main(int argc, char **argv) {
 
@@ -64,12 +71,15 @@ int main(int argc, char **argv) {
     double *best_position = (double *)malloc(NUM_VARIABLES*sizeof(double));
     
     // CODE: measure the CPU time only for the following pso function
-
+    double start = clock();
     double best_fitness = pso(objective_function, NUM_VARIABLES, bounds, NUM_PARTICLES, MAX_ITERATIONS, best_position);
-
+    double stop = clock();
+    double cpu_time = (stop-start)/CLOCKS_PER_SEC;
     // Print results
+    printf("Results of PSO:\n");
+    printf("CPU runime: %f\n",cpu_time);
     // best_fitness is the objective function value (fitness) for the final global best solution, this is the lowest fitness achieved
-    printf("Optimal fitness: %lf\n", best_fitness)
+    printf("Optimal fitness: %lf\n", best_fitness);
     printf("Optimal position: ");
     for (int i = 0; i < NUM_VARIABLES; i++) {
         printf("%lf ", best_position[i]);
