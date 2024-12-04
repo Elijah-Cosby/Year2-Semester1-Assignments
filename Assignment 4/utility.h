@@ -20,6 +20,7 @@ typedef struct Particle{
     double velocity[NUM_VARIABLES];
     double bestPosition[NUM_VARIABLES];
     double fitnessVal;
+    double bestFitnessVal;
 }Particle;
 
 #endif // UTILITY_H
