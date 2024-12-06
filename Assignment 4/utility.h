@@ -16,9 +16,9 @@ double pso(ObjectiveFunction objective_function, int NUM_VARIABLES, Bound *bound
 
 // CODE: declare other functions and structures if necessary
 typedef struct Particle{
-    double position[NUM_VARIABLES];
-    double velocity[NUM_VARIABLES];
-    double bestPosition[NUM_VARIABLES];
+    double *position;
+    double *velocity;
+    double *bestPosition;
     double fitnessVal;
     double bestFitnessVal;
 }Particle;

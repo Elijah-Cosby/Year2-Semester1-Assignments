@@ -8,7 +8,6 @@
 #include "utility.h"
 
 int main(int argc, char **argv) {
-
     // Validate arguments
     if (argc < 7) {
         fprintf(stderr, "Usage: %s <ObjectiveFunctionName> <NUM_VARIABLES> <LowerBound> <UpperBound> <NUM_PARTICLES> <MAX_ITERATIONS>\n", argv[0]);
@@ -49,6 +48,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+
     // Print inputs for verification
     printf("Objective Function: %s\n", objective_function_name);
     printf("Number of Variables: %d\n", NUM_VARIABLES);
@@ -58,6 +58,10 @@ int main(int argc, char **argv) {
     
     // bounds[j] stores the lower and upper bound for variable j
     Bound *bounds = (Bound *)malloc(NUM_VARIABLES*sizeof(Bound));
+
+//seeding rand function to ensure "more random values"
+    srand((unsigned int)time(NULL));
+
 
     // The following loop means all the vairables have the same lower and upper bounds
     for (int i = 0; i < NUM_VARIABLES; i++)
@@ -71,13 +75,13 @@ int main(int argc, char **argv) {
     double *best_position = (double *)malloc(NUM_VARIABLES*sizeof(double));
     
     // CODE: measure the CPU time only for the following pso function
-    double start = clock();
+    clock_t start = clock();
     double best_fitness = pso(objective_function, NUM_VARIABLES, bounds, NUM_PARTICLES, MAX_ITERATIONS, best_position);
-    double stop = clock();
-    double cpu_time = (stop-start)/CLOCKS_PER_SEC;
+    clock_t stop = clock();
+    double cpu_time = ((double)(stop-start))/CLOCKS_PER_SEC;
     // Print results
     printf("Results of PSO:\n");
-    printf("CPU runime: %f\n",cpu_time);
+    printf("CPU runtime: %f\n",cpu_time);
     // best_fitness is the objective function value (fitness) for the final global best solution, this is the lowest fitness achieved
     printf("Optimal fitness: %lf\n", best_fitness);
     printf("Optimal position: ");
