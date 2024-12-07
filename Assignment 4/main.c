@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
     printf("Objective Function: %s\n", objective_function_name);
     printf("Number of Variables: %d\n", NUM_VARIABLES);
     printf("Lower Bound for all variables: %lf\n", lower_bound);
-    printf("Upper Bound for all variables: %lf\n", upper_bound);
+    printf("Upper Bound for all variables: %lf\n\n", upper_bound);
 
     
     // bounds[j] stores the lower and upper bound for variable j
