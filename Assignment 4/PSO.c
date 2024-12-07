@@ -19,9 +19,7 @@ void allocateInitParticles(Particle *Swarm, int NUM_PARTICLES, int NUM_VARIABLES
         Swarm[i].position = malloc(NUM_VARIABLES*sizeof(double));
         Swarm[i].velocity = malloc(NUM_VARIABLES*sizeof(double));
         Swarm[i].bestPosition = malloc(NUM_VARIABLES*sizeof(double));
-        //double initPosition = random_double(bounds[i].lowerBound, bounds[i].upperBound);
         for(int j=0; j<NUM_VARIABLES;j++){
-            //Swarm[i].position[j] = initPosition;
             Swarm[i].position[j] = random_double(bounds[j].lowerBound, bounds[j].upperBound);
             Swarm[i].velocity[j] = random_double(bounds[j].lowerBound, bounds[j].upperBound);
             Swarm[i].bestPosition[j] = Swarm[i].position[j];
@@ -54,9 +52,7 @@ double pso(ObjectiveFunction objective_function, int NUM_VARIABLES, Bound *bound
 
 //For neighboorhood method, adding a local best
     double *bestLocalPosition = malloc(NUM_PARTICLES * NUM_VARIABLES * sizeof(double));
-    //double *bestLocalFitness = malloc(NUM_PARTICLES * sizeof(double));
     for (int i = 0; i < NUM_PARTICLES; i++) {
-        //bestLocalFitness[i] = Swarm[i].bestFitnessVal;
         for (int k = 0; k < NUM_VARIABLES; k++) {
             bestLocalPosition[i * NUM_VARIABLES + k] = Swarm[i].bestPosition[k];
         }
